@@ -1,0 +1,43 @@
+---
+- hosts: 13.233.84.219
+  tasks:
+    - name: make directory
+      file: path=/opt/tomcat9 state=directory mode=0755
+
+    - name: download tomcat
+      get_url: url=http://mirrors.estointernet.in/apache/tomcat/tomcat-9/v9.0.14/bin/apache-tomcat-9.0.14.tar.gz dest=/root/
+
+    - name: unzip the code
+#      command: "tar -xzvf apache-tomcat-9.0.14.tar.gz -C /opt/tomcat9 --strip-components=1"
+      unarchive: src=/root/apache-tomcat-9.0.14.tar.gz dest=/opt/tomcat9 remote_src=yes
+
+#    - name: move the code
+#      file: src=apache-tocat-9.0.14 dest=/opt/tomcat9
+
+#    - name: remove name
+#      user: name=tomcat state=absent remove=yes
+
+    - name: add user "tomcat"
+      user: name=tomcat1 home=/opt/tomcat9 shell=/sbin/nologin
+
+    - name: change ownership of tomcat installation
+      file: path=/opt/tomcat9 owner=tomcat1 state=directory recurse=yes
+
+    - name: install tomcat package
+      package: name=tomcat state=present
+
+    - name: manage tomcat service
+      service: name=tomcat state=started enabled=yes
+
+    - name: install java package
+      package: name=java state=present
+
+    - name: Start Tomcat
+      command: /opt/tomcat9/apache-tomcat-9.0.14/bin/startup.sh
+      sudo: true
+      sudo_user: tomcat1
+
+#    - name: wait for tomcat to start
+#      wait_for: port=8080
+
+
